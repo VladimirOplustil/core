@@ -4571,7 +4571,8 @@ trait WebDav {
 				$user,
 				$this->getPasswordForUser($user),
 				$path,
-				$this->getStepLineRef()
+				$this->getStepLineRef(),
+				$this->getDavPathVersion()
 			);
 		} catch (Exception $e) {
 			return null;
@@ -4580,6 +4581,7 @@ trait WebDav {
 
 	/**
 	 * @Given /^user "([^"]*)" has stored id of file "([^"]*)"$/
+	 * @When /^user "([^"]*)" stores id of file "([^"]*)"$/
 	 *
 	 * @param string $user
 	 * @param string $path
