@@ -393,4 +393,12 @@ interface IShare {
 	 * @since 10.0.10
 	 */
 	public function setShouldHashPassword($status);
+
+	public function setShowOptions($showOptions);
+
+	public function getShowOptions();
+
+	public function setDescription($description);
+
+	public function getDescription();
 }
