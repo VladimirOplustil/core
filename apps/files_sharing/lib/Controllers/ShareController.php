@@ -343,6 +343,9 @@ class ShareController extends Controller {
 		$shareTmpl['dir'] = '';
 		$shareTmpl['nonHumanFileSize'] = $share->getNode()->getSize();
 		$shareTmpl['fileSize'] = \OCP\Util::humanFileSize($share->getNode()->getSize());
+		$shareTmpl['username'] = ($share->getShowOptions() & 1) > 0 ? $share->getSharedBy() : null;
+		$shareTmpl['linkname'] = ($share->getShowOptions() & 2) > 0 ? $share->getName() : null;
+		$shareTmpl['description'] = $share->getDescription();
 
 		// Show file list
 		if ($share->getNode() instanceof \OCP\Files\Folder) {
