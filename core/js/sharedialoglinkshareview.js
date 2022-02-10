@@ -43,6 +43,20 @@
 				'<label class="bold" for="sharingDialogAllowPublicUpload-{{cid}}">{{publicUploadLabel}}</label>' +
 				'<p><em>{{publicUploadDescription}}</em></p>' +
 			'</div>' +
+			'<div id="publicUploadOptions">' +
+				'<div class="public-link-modal--item">' +
+					'<input type="checkbox" value="1" name="showUsername" id="sharingDialogShowUsername-{{cid}}" class="checkbox" {{#if showUsernameValue}}checked{{/if}}/>' +
+					'<label class="bold" for="sharingDialogShowUsername-{{cid}}">{{showUsernameLabel}}</label>' +
+				'</div>' +
+				'<div class="public-link-modal--item">' +
+					'<input type="checkbox" value="2" name="showLinkname" id="sharingDialogShowLinkname-{{cid}}" class="checkbox" {{#if showLinknameValue}}checked{{/if}}/>' +
+		                       	'<label class="bold" for="sharingDialogShowLinkname-{{cid}}">{{showLinknameLabel}}</label>' +
+				'</div>' +
+				'<div class="public-link-modal--item">' +
+					'<label class="public-link-modal--label">{{linkDescriptionLabel}}</label>' +
+	                        	'<input class="public-link-modal--input" type="text" name="description" placeholder="{{descriptionPlaceholder}}" value="{{description}}" maxlength="1024" />' +
+				'</div>' +
+			'</div>' +
 			'{{/if}}' +
 			'<div id="linkPass-{{cid}}" class="public-link-modal--item linkPass">' +
 				'<label class="public-link-modal--label" for="linkPassText-{{cid}}">{{passwordLabel}}</label>' +
@@ -109,6 +123,12 @@
 			return (permissions) ? parseInt(permissions, 10) : OC.PERMISSION_READ;
 		},
 
+		_getShowOptions: function() {
+			var showUsername = this.$('input[name="showUsername"]:checked').val() ? 1 : 0;
+			var showLinkname = this.$('input[name="showLinkname"]:checked').val() ? 2 : 0;
+			return showUsername + showLinkname;
+		},
+
 		_shouldRequirePassword: function() {
 			// matching passwordMustBeEnforced from server side
 			var permissions = this._getPermissions();
@@ -152,7 +172,9 @@
 				expireDate: expirationDate,
 				permissions: this._getPermissions(),
 				name: this.$('[name=linkName]').val(),
-				shareType: this.model.get('shareType')
+				shareType: this.model.get('shareType'),
+				showOptions: this._getShowOptions(),
+				description: this.$('[name=description]').val()
 			};
 
 			// Reset password for the time being
@@ -274,6 +296,15 @@
 				publicReadWriteValue       : OC.PERMISSION_READ | OC.PERMISSION_UPDATE | OC.PERMISSION_CREATE | OC.PERMISSION_DELETE,
 				publicReadWriteSelected    : this.model.get('permissions') >= (OC.PERMISSION_READ | OC.PERMISSION_UPDATE | OC.PERMISSION_CREATE | OC.PERMISSION_DELETE),
 
+				showUsernameValue	   : (parseInt(this.model.get('show_options')) & 1) > 0,
+				showUsernameLabel	   : t('core', 'Show user name'),
+				showLinknameValue	   : (parseInt(this.model.get('show_options')) & 2) > 0,
+				showLinknameLabel	   : t('core', 'Show link name'),
+
+				linkDescriptionLabel	   : t('core', 'Description of link'),
+				descriptionPlaceholder     : t('core', 'Description'),
+				description		   : this.model.get('description'),
+
 				isMailEnabled: showEmailField
 			}));
 
@@ -293,6 +324,20 @@
 
 			this.expirationView.render();
 			this.$('.expirationDateContainer').append(this.expirationView.$el);
+
+			var permissions = this.$el.find('.publicPermissions');
+			var options = this.$el.find('#publicUploadOptions');
+			if (this.model.get('permissions') !== OC.PERMISSION_CREATE) {
+				options.hide();
+			}
+			permissions.click(function(){
+				if (this.value == '4') {
+					options.show();
+				}
+				else {
+					options.hide();
+				}
+			});
 
 			this.delegateEvents();
 
@@ -328,6 +373,7 @@
 			this.$dialog.ocdialog('close');
 			this.model.unset("resetPassword");
 		},
+
 		/**
 		 * @returns {Function} from Handlebars
 		 * @private
