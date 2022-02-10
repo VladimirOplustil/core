@@ -176,7 +176,9 @@ class Share20OcsController extends OCSController {
 			'expiration' => null,
 			'token' => null,
 			'uid_file_owner' => $share->getShareOwner(),
-			'displayname_file_owner' => $shareFileOwner !== null ? $shareFileOwner->getDisplayName() : $share->getShareOwner()
+			'displayname_file_owner' => $shareFileOwner !== null ? $shareFileOwner->getDisplayName() : $share->getShareOwner(),
+			'show_options' => $share->getShowOptions(),
+			'description' => $share->getDescription()
 		];
 		if ($sharedBy !== null) {
 			$result['additional_info_owner'] = $this->getAdditionalUserInfo($sharedBy);
@@ -498,6 +500,13 @@ class Share20OcsController extends OCSController {
 				$share->setPermissions(Constants::PERMISSION_READ);
 			}
 
+			if ($permissions === Constants::PERMISSION_CREATE) {
+				$showOptions = (int)$this->request->getParam('showOptions', 0);
+				$description = $this->request->getParam('description', null);
+				$share->setShowOptions($showOptions);
+				$share->setDescription($description);
+			}
+
 			// set name only if passed as parameter, empty string is allowed
 			if ($name !== null) {
 				$share->setName($name);
@@ -812,6 +821,8 @@ class Share20OcsController extends OCSController {
 		$publicUpload = $this->request->getParam('publicUpload', null);
 		$expireDate = $this->request->getParam('expireDate', null);
 		$name = $this->request->getParam('name', null);
+		$showOptions = $this->request->getParam('showOptions', 0);
+		$description = $this->request->getParam('description', null);
 
 		/*
 		 * expirationdate, password and publicUpload only make sense for link shares
@@ -891,6 +902,14 @@ class Share20OcsController extends OCSController {
 				$share->setPassword(null);
 			} elseif ($password !== null) {
 				$share->setPassword($password);
+			}
+
+			if ($newPermissions === Constants::PERMISSION_CREATE) {
+				$share->setShowOptions($showOptions);
+				$share->setDescription($description);
+			} else {
+				$share->setShowOptions(0);
+				$share->setDescription(null);
 			}
 		} else {
 			// For other shares only permissions is valid.
