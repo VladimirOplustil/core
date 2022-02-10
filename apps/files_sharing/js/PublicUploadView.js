@@ -15,7 +15,12 @@
 
 	var TEMPLATE =
 		'<div>' +
-		'    <h2>{{title}}</h2>' +
+		'    <h2>' +
+		'        {{title}}' +
+                '        {{#if showLinkname}}' +
+		'        to {{linkname}}.' +
+		'        {{/if}}' +
+		'    </h2>' +
 		'    <div id="uploadprogresswrapper">' +
 		'        <div id="uploadprogressbar">' +
 		'            <em class="label outer" style="display:none">' +
@@ -35,6 +40,12 @@
 		'        <h3>{{uploadedFilesMessage}}</h3>' +
 		'        <ul></ul>' +
 		'    </div>' +
+		'    {{#if showUsername}}' +
+		'    <h3>Shared by {{username}}.</h3>' +
+		'    {{/if}}' +
+		'    {{#if showDescription}}' +
+		'    <p>{{description}}</p>' +
+		'    {{/if}}' +
 		'</div>'
 	;
 
@@ -124,7 +135,13 @@
 				title: t('files_sharing', 'Anonymous upload'),
 				uploadButtonLabel: t('files_sharing', 'Click to select files or use drag & drop to upload'),
 				uploadedFilesMessage: t('files_sharing', 'Uploaded files'),
-				uploadProgressText: t('core', 'Uploading...')
+				uploadProgressText: t('core', 'Uploading...'),
+				description: $("#description").val(),
+				showDescription: $("#description").val() != "", 
+				linkname: $("#linkname").val(),
+				showLinkname: $("#linkname").val() != "",
+				username: $("#username").val(),
+				showUsername: $("#username").val() != ""
 			}));
 
 			this.$el.find('.has-tooltip').tooltip();
