@@ -171,6 +171,10 @@ class DefaultShareProvider implements IShareProvider {
 		// Set the file target
 		$qb->setValue('file_target', $qb->createNamedParameter($share->getTarget()));
 
+		$qb->setValue('show_options', $qb->createNamedParameter($share->getShowOptions()));
+
+		$qb->setValue('description', $qb->createNamedParameter($share->getDescription()));		
+
 		// Set the time this share was created
 		$qb->setValue('stime', $qb->createNamedParameter(\time()));
 
@@ -281,6 +285,8 @@ class DefaultShareProvider implements IShareProvider {
 				->set('token', $qb->createNamedParameter($share->getToken()))
 				->set('expiration', $qb->createNamedParameter($share->getExpirationDate(), IQueryBuilder::PARAM_DATE))
 				->set('share_name', $qb->createNamedParameter($share->getName()))
+				->set('show_options', $qb->createNamedParameter($share->getShowOptions()))
+				->set('description', $qb->createNamedParameter($share->getDescription()))
 				->execute();
 		}
 
@@ -1030,6 +1036,9 @@ class DefaultShareProvider implements IShareProvider {
 		}
 
 		$share->setProviderId($this->identifier());
+		
+		$share->setShowOptions((int)$data['show_options']);
+		$share->setDescription($data['description']);
 
 		return $share;
 	}

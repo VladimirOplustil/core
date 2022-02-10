@@ -75,6 +75,10 @@ class Share implements IShare {
 	private $state;
 	/** @var bool */
 	private $shouldHashPassword = true;
+	/** @var int */
+	private $showOptions;
+	/** @var string */
+	private $description;
 
 	/** @var IRootFolder */
 	private $rootFolder;
@@ -493,5 +497,35 @@ class Share implements IShare {
 	 */
 	public function setShouldHashPassword($status) {
 		$this->shouldHashPassword = $status;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function setShowOptions($showOptions) {
+		$this->showOptions = $showOptions;
+		return $this;
+	}
+
+        /**
+	 * @inheritdoc
+	 */
+	public function getShowOptions() {
+		return $this->showOptions;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function setDescription($description) {
+		$this->description = $description;
+		return $this;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getDescription() {
+		return $this->description;
 	}
 }
