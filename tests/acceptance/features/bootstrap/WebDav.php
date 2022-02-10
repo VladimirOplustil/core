@@ -4580,8 +4580,8 @@ trait WebDav {
 	}
 
 	/**
-	 * @Given /^user "([^"]*)" has stored id of file "([^"]*)"$/
-	 * @When /^user "([^"]*)" stores id of file "([^"]*)"$/
+	 * @Given /^user "([^"]*)" has stored id of (file|folder) "([^"]*)"$/
+	 * @When /^user "([^"]*)" stores id of (file|folder) "([^"]*)"$/
 	 *
 	 * @param string $user
 	 * @param string $path
@@ -4593,7 +4593,7 @@ trait WebDav {
 	}
 
 	/**
-	 * @Then /^user "([^"]*)" file "([^"]*)" should have the previously stored id$/
+	 * @Then /^user "([^"]*)" (file|folder) "([^"]*)" should have the previously stored id$/
 	 *
 	 * @param string $user
 	 * @param string $path

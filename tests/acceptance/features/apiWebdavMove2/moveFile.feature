@@ -244,7 +244,7 @@ Feature: move (rename) file
       | dav_version |
       | spaces      |
 
-  @files_sharing-app-required
+  @files_sharing-app-required @skipOnOcis
   Scenario Outline: Checking file id after a move between received shares
     Given using <dav_version> DAV path
     And user "Brian" has been created with default attributes and without skeleton files
@@ -253,7 +253,7 @@ Feature: move (rename) file
     And user "Alice" has shared folder "/folderA" with user "Brian"
     And user "Alice" has shared folder "/folderB" with user "Brian"
     And user "Brian" has created folder "/folderA/ONE"
-    And user "Brian" has stored id of file "/folderA/ONE"
+    And user "Brian" has stored id of folder "/folderA/ONE"
     And user "Brian" has created folder "/folderA/ONE/TWO"
     When user "Brian" moves folder "/folderA/ONE" to "/folderB/ONE" using the WebDAV API
     Then as "Brian" folder "/folderA" should exist
@@ -262,7 +262,7 @@ Feature: move (rename) file
     And as "Brian" folder "/folderA/ONE/TWO" should not exist
     And as "Brian" folder "/folderB/ONE" should exist
     And as "Brian" folder "/folderB/ONE/TWO" should exist
-    And user "Brian" file "/folderB/ONE" should have the previously stored id
+    And user "Brian" folder "/folderB/ONE" should have the previously stored id
     Examples:
       | dav_version |
       | old         |
@@ -324,18 +324,18 @@ Feature: move (rename) file
   Scenario Outline: renaming to a file with question mark in its name
     Given using <dav_version> DAV path
     And user "Alice" has uploaded file with content "ownCloud test text file 0" to "textfile0.txt"
-    When user "Alice" moves file "/textfile0.txt" to "/#oc ab?cd=ef#" using the WebDAV API
+    When user "Alice" moves file "/textfile0.txt" to "/<renamed_file>" using the WebDAV API
     Then the HTTP status code should be "201"
-    And the content of file "/#oc ab?cd=ef#" for user "Alice" should be "ownCloud test text file 0"
+    And the content of file "/<renamed_file>" for user "Alice" should be "ownCloud test text file 0"
     Examples:
-      | dav_version |
-      | old         |
-      | new         |
+      | dav_version | renamed_file  |
+      | old         | #oc ab?cd=ef# |
+      | new         | #oc ab?cd=ef# |
 
     @skipOnOcV10 @personalSpace
     Examples:
-      | dav_version |
-      | spaces      |
+      | dav_version | renamed_file  |
+      | spaces      | #oc ab?cd=ef# |
 
 
   Scenario Outline: renaming file with dots in the path
@@ -403,6 +403,7 @@ Feature: move (rename) file
       | dav_version |
       | spaces      |
 
+
   Scenario Outline: Moving a hidden file
     Given using <dav_version> DAV path
     And user "Alice" has created folder "FOLDER"
@@ -428,6 +429,7 @@ Feature: move (rename) file
     Examples:
       | dav_version |
       | spaces      |
+
 
   Scenario Outline: Renaming to/from a hidden file
     Given using <dav_version> DAV path

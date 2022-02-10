@@ -7,7 +7,6 @@ Feature: move (rename) file
   Background:
     Given using OCS API version "1"
     And user "Alice" has been created with default attributes and without skeleton files
-    And parameter "shareapi_auto_accept_share" of app "core" has been set to "yes"
 
 
   Scenario Outline: Moving a file into a shared folder as the sharee and as the sharer
@@ -21,23 +20,23 @@ Feature: move (rename) file
       | shareWith   | Alice     |
     And user "<mover>" has uploaded file with content "test data" to "/testfile.txt"
     When user "Alice" accepts share "/testshare" offered by user "Brian" using the sharing API
-    And user "<mover>" moves file "/testfile.txt" to "<dst-folder>/testfile.txt" using the WebDAV API
+    And user "<mover>" moves file "/testfile.txt" to "<destination_folder>/testfile.txt" using the WebDAV API
     Then the HTTP status code should be "201"
     And the content of file "/Shares/testshare/testfile.txt" for user "Alice" should be "test data"
     And the content of file "/testshare/testfile.txt" for user "Brian" should be "test data"
     And as "<mover>" file "/testfile.txt" should not exist
     Examples:
-      | dav_version | mover | dst-folder        |
-      | old         | Alice | /Shares/testshare |
-      | new         | Alice | /Shares/testshare |
-      | old         | Brian | /testshare        |
-      | new         | Brian | /testshare        |
+      | dav_version | mover | destination_folder |
+      | old         | Alice | /Shares/testshare  |
+      | new         | Alice | /Shares/testshare  |
+      | old         | Brian | /testshare         |
+      | new         | Brian | /testshare         |
 
     @personalSpace
     Examples:
-      | dav_version | mover | dst-folder        |
-      | spaces      | Alice | /Shares/testshare |
-      | spaces      | Brian | /testshare        |
+      | dav_version | mover | destination_folder |
+      | spaces      | Alice | /Shares/testshare  |
+      | spaces      | Brian | /testshare         |
 
 
   Scenario Outline: Moving a file out of a shared folder as the sharee and as the sharer
@@ -51,13 +50,13 @@ Feature: move (rename) file
       | permissions | change    |
       | shareWith   | Alice     |
     When user "Alice" accepts share "/testshare" offered by user "Brian" using the sharing API
-    And user "<mover>" moves file "<src-folder>/testfile.txt" to "/testfile.txt" using the WebDAV API
+    And user "<mover>" moves file "<source_folder>/testfile.txt" to "/testfile.txt" using the WebDAV API
     Then the HTTP status code should be "201"
     And the content of file "/testfile.txt" for user "<mover>" should be "test data"
     And as "Alice" file "/Shares/testfile.txt" should not exist
     And as "Brian" file "/testshare/testfile.txt" should not exist
     Examples:
-      | dav_version | mover | src-folder        |
+      | dav_version | mover | source_folder     |
       | old         | Alice | /Shares/testshare |
       | new         | Alice | /Shares/testshare |
       | old         | Brian | /testshare        |
@@ -65,7 +64,7 @@ Feature: move (rename) file
 
     @personalSpace
     Examples:
-      | dav_version | mover | src-folder        |
+      | dav_version | mover | source_folder     |
       | spaces      | Alice | /Shares/testshare |
       | spaces      | Brian | /testshare        |
 
@@ -82,23 +81,23 @@ Feature: move (rename) file
     And user "<mover>" has created folder "/testsubfolder"
     And user "<mover>" has uploaded file with content "test data" to "/testsubfolder/testfile.txt"
     When user "Alice" accepts share "/testshare" offered by user "Brian" using the sharing API
-    And user "<mover>" moves folder "/testsubfolder" to "<dst-folder>/testsubfolder" using the WebDAV API
+    And user "<mover>" moves folder "/testsubfolder" to "<destination_folder>/testsubfolder" using the WebDAV API
     Then the HTTP status code should be "201"
     And the content of file "/Shares/testshare/testsubfolder/testfile.txt" for user "Alice" should be "test data"
     And the content of file "/testshare/testsubfolder/testfile.txt" for user "Brian" should be "test data"
     And as "<mover>" file "/testsubfolder" should not exist
     Examples:
-      | dav_version | mover | dst-folder        |
-      | old         | Alice | /Shares/testshare |
-      | new         | Alice | /Shares/testshare |
-      | old         | Brian | /testshare        |
-      | new         | Brian | /testshare        |
+      | dav_version | mover | destination_folder |
+      | old         | Alice | /Shares/testshare  |
+      | new         | Alice | /Shares/testshare  |
+      | old         | Brian | /testshare         |
+      | new         | Brian | /testshare         |
 
     @personalSpace
     Examples:
-      | dav_version | mover | dst-folder        |
-      | spaces      | Alice | /Shares/testshare |
-      | spaces      | Brian | /testshare        |
+      | dav_version | mover | destination_folder |
+      | spaces      | Alice | /Shares/testshare  |
+      | spaces      | Brian | /testshare         |
 
 
   Scenario Outline: Moving a folder out of a shared folder as the sharee and as the sharer
@@ -113,13 +112,13 @@ Feature: move (rename) file
       | permissions | change    |
       | shareWith   | Alice     |
     When user "Alice" accepts share "/testshare" offered by user "Brian" using the sharing API
-    And user "<mover>" moves folder "<src-folder>/testsubfolder" to "/testsubfolder" using the WebDAV API
+    And user "<mover>" moves folder "<source_folder>/testsubfolder" to "/testsubfolder" using the WebDAV API
     Then the HTTP status code should be "201"
     And the content of file "/testsubfolder/testfile.txt" for user "<mover>" should be "test data"
-    And as "Alice" folder "<src-folder>/testsubfolder" should not exist
+    And as "Alice" folder "<source_folder>/testsubfolder" should not exist
     And as "Brian" folder "/testshare/testsubfolder" should not exist
     Examples:
-      | dav_version | mover | src-folder        |
+      | dav_version | mover | source_folder     |
       | old         | Alice | /Shares/testshare |
       | new         | Alice | /Shares/testshare |
       | old         | Brian | /testshare        |
@@ -127,7 +126,7 @@ Feature: move (rename) file
 
     @personalSpace
     Examples:
-      | dav_version | mover | src-folder        |
+      | dav_version | mover | source_folder     |
       | spaces      | Alice | /Shares/testshare |
       | spaces      | Brian | /testshare        |
 
@@ -197,7 +196,7 @@ Feature: move (rename) file
       | /folderA    |
       | /folderB    |
     And user "Brian" creates folder "/Shares/folderA/ONE" using the WebDAV API
-    And user "Brian" stores id of file "/Shares/folderA/ONE"
+    And user "Brian" stores id of folder "/Shares/folderA/ONE"
     And user "Brian" creates folder "/Shares/folderA/ONE/TWO" using the WebDAV API
     And user "Brian" moves folder "/Shares/folderA/ONE" to "/Shares/folderB/ONE" using the WebDAV API
     Then as "Brian" folder "/Shares/folderA" should exist
@@ -205,7 +204,7 @@ Feature: move (rename) file
     And as "Brian" folder "/Shares/folderA/ONE/TWO" should not exist
     And as "Brian" folder "/Shares/folderB/ONE" should exist
     And as "Brian" folder "/Shares/folderB/ONE/TWO" should exist
-    And user "Brian" file "/Shares/folderB/ONE" should have the previously stored id
+    And user "Brian" folder "/Shares/folderB/ONE" should have the previously stored id
     Examples:
       | dav_version |
       | old         |
