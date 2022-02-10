@@ -52,6 +52,9 @@ OCP\Util::addHeader('meta', ['property' => "og:image", 'content' => $_['previewI
 <input type="hidden" name="filesize" value="<?php p($_['nonHumanFileSize']); ?>" id="filesize">
 <input type="hidden" name="maxSizeAnimateGif" value="<?php p($_['maxSizeAnimateGif']); ?>" id="maxSizeAnimateGif">
 <input type="hidden" name="sharePermission" value="<?php p($_['sharePermission']); ?>" id="sharePermission">
+<input type="hidden" name="description" value="<?php p($_['description']); ?>" id="description">
+<input type="hidden" name="username" value="<?php p($_['username']); ?>" id="username">
+<input type="hidden" name="linkname" value="<?php p($_['linkname']); ?>" id="linkname">
 
 <header>
 	<div id="header" class="<?php p((isset($_['folder']) ? 'share-folder' : 'share-file')) ?>" data-protected="<?php p($_['protected']) ?>"
