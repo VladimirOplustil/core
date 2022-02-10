@@ -733,11 +733,13 @@ class Share extends Constants {
 	 * @param string $itemSourceName
 	 * @param \DateTime $expirationDate
 	 * @param bool $passwordChanged
+	 * @param int $showOptions
+	 * @param string $description
 	 * @return boolean|string Returns true on success or false on failure, Returns token on success for links
 	 * @throws \OC\HintException when the share type is remote and the shareWith is invalid
 	 * @throws \Exception
 	 */
-	public static function shareItem($itemType, $itemSource, $shareType, $shareWith, $permissions, $itemSourceName = null, \DateTime $expirationDate = null, $passwordChanged = null) {
+	public static function shareItem($itemType, $itemSource, $shareType, $shareWith, $permissions, $itemSourceName = null, \DateTime $expirationDate = null, $passwordChanged = null, $showOptions = null, $description = null) {
 		$backend = self::getBackend($itemType);
 		$l = \OC::$server->getL10N('lib');
 
@@ -1010,7 +1012,9 @@ class Share extends Constants {
 					null,
 					$token,
 					$itemSourceName,
-					$expirationDate
+					$expirationDate,
+					$showOptions,
+					$description
 				);
 				if ($result) {
 					return $token;
@@ -1060,7 +1064,7 @@ class Share extends Constants {
 				\OCP\Security\ISecureRandom::CHAR_DIGITS);
 
 			$shareWith = $user . '@' . $remote;
-			$shareId = self::put($itemType, $itemSource, $shareType, $shareWith, $uidOwner, $permissions, null, $token, $itemSourceName);
+			$shareId = self::put($itemType, $itemSource, $shareType, $shareWith, $uidOwner, $permissions, null, $token, $itemSourceName, $showOptions, $description);
 
 			$send = false;
 			if ($shareId) {
@@ -1084,7 +1088,7 @@ class Share extends Constants {
 		}
 
 		// Put the item into the database
-		$result = self::put($itemType, $itemSource, $shareType, $shareWith, $uidOwner, $permissions, null, null, $itemSourceName, $expirationDate);
+		$result = self::put($itemType, $itemSource, $shareType, $shareWith, $uidOwner, $permissions, null, null, $itemSourceName, $expirationDate, $showOptions, $description);
 
 		return $result ? true : false;
 	}
@@ -2318,6 +2322,8 @@ class Share extends Constants {
 	 * @param string $token (optional)
 	 * @param string $itemSourceName name of the source item (optional)
 	 * @param \DateTime $expirationDate (optional)
+	 * @param int $showOptions (optional)
+	 * @param string description (optional)
 	 * @throws \Exception
 	 * @return mixed id of the new share or false
 	 */
@@ -2331,7 +2337,9 @@ class Share extends Constants {
 		$parentFolder = null,
 		$token = null,
 		$itemSourceName = null,
-		\DateTime $expirationDate = null
+		\DateTime $expirationDate = null,
+		$showOptions = null,
+		$description = null
 	) {
 		$queriesToExecute = [];
 		$suggestedItemTarget = null;
@@ -2392,6 +2400,8 @@ class Share extends Constants {
 				'token'				=> $token,
 				'parent'			=> $parent,
 				'expiration'		=> $expirationDate,
+				'showOptions'		=> $showOptions,
+				'description'		=> $description,
 			];
 		} else {
 			$users = [$shareWith];
@@ -2535,6 +2545,8 @@ class Share extends Constants {
 				'token'				=> $token,
 				'parent'			=> $parent,
 				'expiration'		=> $expirationDate,
+				'showOptions'		=> $showOptions,
+				'description'		=> $description,
 			];
 		}
 
@@ -2688,10 +2700,11 @@ class Share extends Constants {
 	 * @return mixed false in case of a failure or the id of the new share
 	 */
 	private static function insertShare(array $shareData) {
+		echo '<script type="text/JavaScript">console.log("insertShare")</script>';
 		$query = \OC_DB::prepare('INSERT INTO `*PREFIX*share` ('
 			.' `item_type`, `item_source`, `item_target`, `share_type`,'
 			.' `share_with`, `uid_owner`, `permissions`, `stime`, `file_source`,'
-			.' `file_target`, `token`, `parent`, `expiration`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)');
+			.' `file_target`, `token`, `parent`, `expiration`, `show_options`, `description`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
 		$query->bindValue(1, $shareData['itemType']);
 		$query->bindValue(2, $shareData['itemSource']);
 		$query->bindValue(3, $shareData['itemTarget']);
@@ -2705,6 +2718,8 @@ class Share extends Constants {
 		$query->bindValue(11, $shareData['token']);
 		$query->bindValue(12, $shareData['parent']);
 		$query->bindValue(13, $shareData['expiration'], 'datetime');
+		$query->bindValue(14, $shareData['show_options']);
+		$query->bindValue(15, $shareData['description']);
 		$result = $query->execute();
 
 		$id = false;
@@ -2770,9 +2785,9 @@ class Share extends Constants {
 				$select = '`*PREFIX*share`.`id`, `*PREFIX*share`.`parent`, `share_type`, `path`, `storage`, '
 					. '`share_with`, `uid_owner` , `file_source`, `stime`, `*PREFIX*share`.`permissions`, '
 					. '`*PREFIX*storages`.`id` AS `storage_id`, `*PREFIX*filecache`.`parent` as `file_parent`, '
-					. '`uid_initiator`';
+					. '`uid_initiator`, `show_options`, `description`';
 			} else {
-				$select = '`id`, `parent`, `share_type`, `share_with`, `uid_owner`, `item_source`, `stime`, `*PREFIX*share`.`permissions`';
+				$select = '`id`, `parent`, `share_type`, `share_with`, `uid_owner`, `item_source`, `stime`, `*PREFIX*share`.`permissions`, `show_options`, `description`';
 			}
 		} else {
 			if (isset($uidOwner)) {
@@ -2780,10 +2795,10 @@ class Share extends Constants {
 					$select = '`*PREFIX*share`.`id`, `item_type`, `item_source`, `*PREFIX*share`.`parent`,'
 						. ' `share_type`, `share_with`, `file_source`, `file_target`, `path`, `*PREFIX*share`.`permissions`, `stime`,'
 						. ' `expiration`, `token`, `storage`, `mail_send`, `uid_owner`, '
-						. '`*PREFIX*storages`.`id` AS `storage_id`, `*PREFIX*filecache`.`parent` as `file_parent`';
+						. '`*PREFIX*storages`.`id` AS `storage_id`, `*PREFIX*filecache`.`parent` as `file_parent`, `show_options`, `description`';
 				} else {
 					$select = '`id`, `item_type`, `item_source`, `parent`, `share_type`, `share_with`, `*PREFIX*share`.`permissions`,'
-						. ' `stime`, `file_source`, `expiration`, `token`, `mail_send`, `uid_owner`';
+						. ' `stime`, `file_source`, `expiration`, `token`, `mail_send`, `uid_owner`, `show_options`, `description`';
 				}
 			} else {
 				if ($fileDependent) {
@@ -2791,13 +2806,13 @@ class Share extends Constants {
 						$select = '`*PREFIX*share`.`id`, `item_type`, `item_source`, `*PREFIX*share`.`parent`, `uid_owner`, '
 							. '`share_type`, `share_with`, `file_source`, `path`, `file_target`, `stime`, '
 							. '`*PREFIX*share`.`permissions`, `expiration`, `storage`, `*PREFIX*filecache`.`parent` as `file_parent`, '
-							. '`name`, `mtime`, `mimetype`, `mimepart`, `size`, `encrypted`, `etag`, `mail_send`';
+							. '`name`, `mtime`, `mimetype`, `mimepart`, `size`, `encrypted`, `etag`, `mail_send`, `show_options`, `description`';
 					} else {
 						$select = '`*PREFIX*share`.`id`, `item_type`, `item_source`, `item_target`,'
 							. '`*PREFIX*share`.`parent`, `share_type`, `share_with`, `uid_owner`,'
 							. '`file_source`, `path`, `file_target`, `*PREFIX*share`.`permissions`,'
 							. '`stime`, `expiration`, `token`, `storage`, `mail_send`,'
-							. '`*PREFIX*storages`.`id` AS `storage_id`, `*PREFIX*filecache`.`parent` as `file_parent`';
+							. '`*PREFIX*storages`.`id` AS `storage_id`, `*PREFIX*filecache`.`parent` as `file_parent`, `show_options`, `description`';
 					}
 				}
 			}
@@ -2838,6 +2853,9 @@ class Share extends Constants {
 			// discard expiration date for non-link shares, which might have been
 			// set by ancient bugs
 			$row['expiration'] = null;
+		}
+		if (isset($row['show_options'])) {
+			$row['show_options'] = (int) $row['show_options'];
 		}
 	}
 
